@@ -1,4 +1,4 @@
-/** Shared Monaco theme/options for main + workspace editors */
+
 
 export const MONACO_THEME = {
   base: "vs-dark",

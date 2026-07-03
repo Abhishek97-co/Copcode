@@ -15,7 +15,7 @@ export default function AboutPage() {
       <div className="pt-28 pb-24 px-6">
         <div className="max-w-4xl mx-auto">
 
-          {/* Hero block — mirrors homepage About section */}
+       
           <CodeWindow filename="about.md" className="shadow-2xl mb-12">
             <div className="relative px-8 py-10 md:px-12 md:py-12 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-[#0e1e2e]/80 via-[#161b22] to-[#1a1230]/60 pointer-events-none" />

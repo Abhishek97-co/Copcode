@@ -58,11 +58,11 @@ export default function MainEditor({
     contentRef.current = () => {
       const ytext = ytextRef.current;
       if (ytext) {
-        try { return ytext.toString(); } catch { /* fall through */ }
+        try { return ytext.toString(); } catch { }
       }
       const editor = editorRef.current;
       if (editor && typeof editor.getValue === "function") {
-        try { return editor.getValue() || ""; } catch { /* fall through */ }
+        try { return editor.getValue() || ""; } catch { }
       }
       return activeFile?.content || "";
     };
@@ -75,7 +75,7 @@ export default function MainEditor({
     return () => {
       if (cleaned) return;
       cleaned = true;
-      // Remove all socket listeners for this file
+      
       if (socket && handlers) {
         const { step1Reply, step2Request, update, overwrite } = handlers;
         try { socket.off("editor:sync-step1-reply",   step1Reply);   } catch { /* ignore */ }
@@ -83,27 +83,25 @@ export default function MainEditor({
         try { socket.off("editor:update",             update);       } catch { /* ignore */ }
         try { socket.off("editor:overwrite",          overwrite);    } catch { /* ignore */ }
       }
-      // Remove Yjs update listener
-      // (handlers.yjsUpdate is on the ydoc that may already be destroyed)
+      
       if (ydoc && handlers?.yjsUpdate) {
-        try { ydoc.off("update", handlers.yjsUpdate); } catch { /* ignore */ }
+        try { ydoc.off("update", handlers.yjsUpdate); } catch {  }
       }
-      // Destroy MonacoBinding
+      
       if (binding) {
-        try { binding.destroy(); } catch { /* ignore */ }
+        try { binding.destroy(); } catch {  }
       }
-      // Destroy Y.Doc
+      
       if (ydoc) {
-        try { ydoc.destroy(); } catch { /* ignore */ }
+        try { ydoc.destroy(); } catch {  }
       }
-      // Clear dangling refs
+     
       ytextRef.current = null;
       ydocRef.current  = null;
     };
   }, []);
 
-  // ── setupYjs: creates Y.Doc, binding, and socket listeners ─
-  // Returns a teardown function — this is the ONLY teardown path.
+  
   const setupYjs = useCallback((file) => {
     if (!file || !editorRef.current || !monacoRef.current) return null;
 
@@ -112,24 +110,21 @@ export default function MainEditor({
     const model = editorRef.current?.getModel?.();
     if (!model) return null;
 
-    // Create Y.Doc + shared text
     const ydoc  = new Y.Doc();
     const ytext = ydoc.getText("content");
     ydocRef.current  = ydoc;
     ytextRef.current = ytext;
 
-    // Update Monaco model language (without remounting)
+    
     monacoRef.current.editor.setModelLanguage(
       model,
       getMonacoLanguage(file.name)
     );
 
-    // Clear stale model text before binding.
-    // MonacoBinding will initialize ytext/model sync from the current model state.
+    
     model.setValue("");
 
-    // Create MonacoBinding — links ytext ↔ Monaco bidirectionally
-    // Do NOT call editor.setValue() — MonacoBinding owns content
+   
     const binding = new MonacoBinding(
       ytext,
       model,
@@ -138,29 +133,27 @@ export default function MainEditor({
     );
     bindingRef.current = binding;
 
-    // Offline fallback
+    
     if (!socket || !roomId) {
       if (file.content) ytext.insert(0, file.content);
       return buildTeardown(ydoc, binding, null, null);
     }
 
-    // 2-step Yjs handshake
-    // Step 1: send our state vector to server
+    
     const sv = Y.encodeStateVector(ydoc);
     socket.emit("editor:sync-step1", {
       roomId,
       filePath: file.path,
-      stateVector: Array.from(sv), // Array.from for Socket.io transport
+      stateVector: Array.from(sv), 
     });
 
-    // Define all handlers with path guard
-    // Path guard: ignore events for files we no longer have open.
-    const filePath = file.path; // captured in closure
+    
+    const filePath = file.path; 
 
     const step1Reply = ({ filePath: fp, update }) => {
       if (fp !== activePathRef.current) return;
       if (!update?.length) return;
-      // new Uint8Array(Array) converts Socket.io array back to binary
+     
       Y.applyUpdate(ydoc, new Uint8Array(update));
     };
 
@@ -169,12 +162,12 @@ export default function MainEditor({
       if (!stateVector?.length) return;
       const serverSV = new Uint8Array(stateVector);
       const missing  = Y.encodeStateAsUpdate(ydoc, serverSV);
-      // Only send if we have something the server doesn't (>2 bytes = non-empty)
+      
       if (missing.length > 2) {
         socket.emit("editor:sync-step2", {
           roomId,
           filePath: fp,
-          update: Array.from(missing), // Array.from for Socket.io transport
+          update: Array.from(missing), 
         });
       }
     };
@@ -182,15 +175,11 @@ export default function MainEditor({
     const update = ({ filePath: fp, update: upd }) => {
       if (fp !== activePathRef.current) return;
       if (!upd?.length) return;
-      // Apply with "remote" origin — prevents handleYjsUpdate re-emitting
+     
       Y.applyUpdate(ydoc, new Uint8Array(upd), "remote");
     };
 
-    /**
-     * Full sync from server (push / overwrite). Never merge a snapshot update into
-     * this client's Y.Doc — Y.merge would interleave CRDT ops and duplicate text.
-     * Prefer authoritative `content`; else decode snapshot on a throwaway Doc.
-     */
+  
     const overwrite = ({ filePath: fp, update: upd, content: snapshot }) => {
       if (fp !== activePathRef.current) return;
       const ytext = ydoc.getText("content");
@@ -214,14 +203,14 @@ export default function MainEditor({
     };
 
     const yjsUpdate = (upd, origin) => {
-      // Do NOT re-broadcast remote or overwrite updates
+     
       if (origin === "remote" || origin === "overwrite") return;
 
-      // Send incremental update to server
+     
       socket.emit("editor:update", {
         roomId,
         filePath,
-        update: Array.from(upd), // Array.from for Socket.io transport
+        update: Array.from(upd), 
       });
 
       setUnsavedFiles((prev) => new Set(prev).add(filePath));
@@ -239,14 +228,14 @@ export default function MainEditor({
       }
     };
 
-    // Register all listeners
+    
     socket.on("editor:sync-step1-reply",   step1Reply);
     socket.on("editor:sync-step2-request", step2Request);
     socket.on("editor:update",             update);
     socket.on("editor:overwrite",          overwrite);
     ydoc.on("update", yjsUpdate);
 
-    // Return teardown — called by useEffect cleanup (Bug 4 fix)
+   
     return buildTeardown(ydoc, binding, socket, {
       step1Reply,
       step2Request,
@@ -257,7 +246,7 @@ export default function MainEditor({
 
   }, [socket, roomId, autoSave, buildTeardown]);
 
-  // Monaco onMount
+ 
   const handleWillMount = (monaco) => {
     monaco.editor.defineTheme("copcode-dark", MONACO_THEME);
     monacoRef.current = monaco;
@@ -282,7 +271,7 @@ export default function MainEditor({
 
   useEffect(() => {
     if (activeFile) return;
-    // Defer reset so we do not synchronously setState inside the effect body (React Compiler).
+   
     queueMicrotask(() => {
       setEditorReady(false);
       editorRef.current = null;
@@ -290,20 +279,17 @@ export default function MainEditor({
     });
   }, [activeFile]);
 
-  // React calls the returned cleanup on:
-  //   - next render with new activeFile.path (file switch)
-  //   - component unmount
-  // This is the correct React pattern and eliminates the warning.
+  
   useEffect(() => {
     if (!editorReady || !activeFile) return;
 
     const cleanup = setupYjs(activeFile);
 
-    // Return cleanup so React calls it automatically
+    
     return () => {
       clearTimeout(autoSaveTimer.current);
       if (typeof cleanup === "function") cleanup();
-      // Reset refs so contentRef getter doesn't access destroyed objects
+     
       ytextRef.current    = null;
       ydocRef.current     = null;
       bindingRef.current  = null;
@@ -318,7 +304,7 @@ export default function MainEditor({
   return (
     <div className="flex flex-col h-full bg-[#0d1117] overflow-hidden">
 
-      {/* label bar */}
+     
       <div className="flex items-center justify-between px-3 h-6 bg-[#161b22] border-b border-[#30363d] flex-shrink-0">
         <div className="flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
@@ -352,7 +338,7 @@ export default function MainEditor({
         )}
       </div>
 
-      {/* tab bar */}
+     
       <TabBar
         tabs={tabsWithState}
         activeFile={activeFile}
@@ -360,7 +346,7 @@ export default function MainEditor({
         onCloseTab={onCloseTab}
       />
 
-      {/* Monaco Editor — no key prop, stays mounted permanently */}
+      
       <div className="flex-1 overflow-hidden">
         {activeFile ? (
           <MonacoEditor

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import PageShell from "../components/PageShell";
 import CodeWindow from "../components/CodeWindow";
-import { Send, Github, Linkedin, Twitter, CheckCircle2 } from "lucide-react";
+import { Send, Mail, Github, Linkedin, CheckCircle2 } from "lucide-react";
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
@@ -50,8 +50,13 @@ export default function ContactPage() {
             <h1 className="font-mono font-bold text-4xl text-white mb-3">
               Get in <span className="text-cyan-400">touch</span>
             </h1>
+            <p className="text-gray-400 text-sm mb-2">
+              Built by Abhishek Gupta and Pragyansh Gupta.
+            </p>
             <p className="text-gray-400 text-sm">
-              Have a question or want to work together? We'd love to hear from you.
+              Have a question or want to work together? Send a mail to
+              <a href="mailto:abhigta098@gmail.com" className="text-cyan-400 hover:underline ml-1">abhigta098@gmail.com</a>
+              and we will reach out from that account.
             </p>
           </div>
 
@@ -100,9 +105,9 @@ export default function ContactPage() {
           {/* Social row */}
           <div className="flex items-center justify-center gap-6 flex-wrap">
             {[
-              { Icon: Github,   label: "GitHub",   href: "https://github.com"   },
-              { Icon: Linkedin, label: "LinkedIn",  href: "https://linkedin.com" },
-              { Icon: Twitter,  label: "Twitter",   href: "https://twitter.com"  },
+              { Icon: Github,   label: "GitHub",   href: "https://github.com/Abhishek97-co" },
+              { Icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/in/abhishek-gupta-a72145319/" },
+              { Icon: Mail,     label: "Email",    href: "mailto:abhigta098@gmail.com" },
             ].map(({ Icon, label, href }) => (
               <a
                 key={label}
