@@ -8,21 +8,30 @@ import { registerWorkspaceSocket } from "./workspace.socket.js";
 import { registerFileSocket } from "./file.socket.js";
 
 export const initSocket = (httpServer) => {
+  const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined;
   const allowedOrigins = new Set(
-    [process.env.CLIENT_URL, process.env.FRONTEND_URL, "http://localhost:5173", "http://127.0.0.1:5173"]
-      .filter(Boolean)
+    [
+      process.env.CLIENT_URL,
+      process.env.FRONTEND_URL,
+      vercelUrl,
+      "https://copcode.vercel.app",
+      "https://www.copcode.vercel.app",
+      "http://localhost:5173",
+      "http://127.0.0.1:5173",
+    ].filter(Boolean)
   );
 
   const io = new Server(httpServer, {
     cors: {
       origin: (origin, callback) => {
-        if (!origin || allowedOrigins.has(origin)) {
+        if (!origin || allowedOrigins.has(origin) || /^https:\/\/.*\.vercel\.app$/.test(origin)) {
           callback(null, true);
         } else {
           callback(null, false);
         }
       },
       credentials: true,
+      methods: ["GET", "POST"],
     },
     pingTimeout: 60000,
     pingInterval: 25000,
