@@ -1,7 +1,14 @@
 import { create } from "zustand";
 import { io } from "socket.io-client";
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+const getSocketBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_SOCKET_URL;
+  if (envUrl) return envUrl.replace(/\/$/, "");
+  if (typeof window !== "undefined" && import.meta.env.PROD) return window.location.origin;
+  return "http://localhost:5000";
+};
+
+const SOCKET_URL = getSocketBaseUrl();
 
 export const useSocketStore = create((set, get) => ({
   socket: null,
@@ -27,6 +34,7 @@ export const useSocketStore = create((set, get) => ({
       reconnection:        true,
       reconnectionAttempts: 10,
       reconnectionDelay:   1000,
+      path: "/socket.io",
     });
 
     newSocket.on("connect", () => {

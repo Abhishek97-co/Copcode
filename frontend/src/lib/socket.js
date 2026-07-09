@@ -1,6 +1,13 @@
 import { io } from "socket.io-client";
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+const getSocketBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_SOCKET_URL;
+  if (envUrl) return envUrl.replace(/\/$/, "");
+  if (typeof window !== "undefined" && import.meta.env.PROD) return window.location.origin;
+  return "http://localhost:5000";
+};
+
+const SOCKET_URL = getSocketBaseUrl();
 
 let socket = null;
 
@@ -9,6 +16,7 @@ export const getSocket = () => {
     socket = io(SOCKET_URL, {
       withCredentials: true,
       autoConnect: false,
+      path: "/socket.io",
     });
   }
   return socket;

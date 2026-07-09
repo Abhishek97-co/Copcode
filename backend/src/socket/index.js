@@ -8,9 +8,20 @@ import { registerWorkspaceSocket } from "./workspace.socket.js";
 import { registerFileSocket } from "./file.socket.js";
 
 export const initSocket = (httpServer) => {
+  const allowedOrigins = new Set(
+    [process.env.CLIENT_URL, process.env.FRONTEND_URL, "http://localhost:5173", "http://127.0.0.1:5173"]
+      .filter(Boolean)
+  );
+
   const io = new Server(httpServer, {
     cors: {
-      origin: process.env.CLIENT_URL || "http://localhost:5173",
+      origin: (origin, callback) => {
+        if (!origin || allowedOrigins.has(origin)) {
+          callback(null, true);
+        } else {
+          callback(null, false);
+        }
+      },
       credentials: true,
     },
     pingTimeout: 60000,

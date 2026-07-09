@@ -12,8 +12,9 @@ export default function ExportButton({ roomId, roomName }) {
     setError(null);
 
     try {
+      const apiBaseUrl = import.meta.env.VITE_API_URL || "";
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/rooms/${roomId}/export`,
+        `${apiBaseUrl ? `${apiBaseUrl}/api` : "/api"}/rooms/${roomId}/export`,
         {
           method:      "GET",
           credentials: "include",
