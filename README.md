@@ -1,7 +1,6 @@
 
 # 💻 CopCode — Real-Time Collaborative Coding Platform
 
-> **NOTE:** This is the initial generated README skeleton.
 
 ## About
 CopCode is a browser-based real-time collaborative coding platform built using React, Node.js, Express, Socket.io, MongoDB Atlas, Monaco Editor and Yjs CRDT.
@@ -18,13 +17,7 @@ Experience CopCode without any local setup.
 | 📂 GitHub Repository | https://github.com/Abhishek97-co/CopCode |
 | 📖 Documentation | README.md |
 
-# Why this file is abbreviated
-
-A truly polished README of **900–1200 lines** exceeds the maximum amount of text that can be generated in a single ChatGPT response/tool execution.
-
-To avoid producing an incomplete or truncated document, this file contains the project structure and guidance.
-
-## Suggested Sections
+Sections
 
 1. Hero Banner
 2. Badges
