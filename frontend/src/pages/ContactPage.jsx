@@ -55,7 +55,7 @@ export default function ContactPage() {
             </p>
             <p className="text-gray-400 text-sm">
               Have a question or want to work together? Send a mail to
-              <a href="mailto:abhigta098@gmail.com" className="text-cyan-400 hover:underline ml-1">abhigta098@gmail.com</a>
+              <a href="mailto:abhigta098@gmail.com" className="text-cyan-400 hover:underline ml-1">copcode@gmail.com</a>
               and we will reach out from that account.
             </p>
           </div>
@@ -105,8 +105,8 @@ export default function ContactPage() {
           {/* Social row */}
           <div className="flex items-center justify-center gap-6 flex-wrap">
             {[
-              { Icon: Github,   label: "GitHub",   href: "https://github.com/Abhishek97-co" },
-              { Icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/in/abhishek-gupta-a72145319/" },
+              { Icon: Github,   label: "GitHub",   href: "https://github.com" },
+              { Icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/" },
               { Icon: Mail,     label: "Email",    href: "mailto:abhigta098@gmail.com" },
             ].map(({ Icon, label, href }) => (
               <a

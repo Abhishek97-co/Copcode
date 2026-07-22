@@ -35,8 +35,8 @@ export default function Footer() {
           {/* Social */}
           <div className="flex items-center gap-3">
             {[
-              { href: "https://github.com/Abhishek97-co", Icon: Github, label: "GitHub" },
-              { href: "https://www.linkedin.com/in/abhishek-gupta-a72145319/", Icon: Linkedin, label: "LinkedIn" },
+              { href: "https://github.com/", Icon: Github, label: "GitHub" },
+              { href: "https://www.linkedin.com/", Icon: Linkedin, label: "LinkedIn" },
             ].map(({ href, Icon, label }) => (
               <a
                 key={label}
@@ -53,7 +53,7 @@ export default function Footer() {
               href="mailto:abhigta098@gmail.com"
               className="font-mono text-sm text-gray-400 hover:text-white transition-colors"
             >
-              abhigta098@gmail.com
+              copcode@gmail.com
             </a>
           </div>
         </div>
